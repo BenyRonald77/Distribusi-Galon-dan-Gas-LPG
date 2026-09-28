@@ -5,4 +5,6 @@ export const NAV_ITEMS: { href: string; label: string }[] = [
   { href: "/admin/pelanggan", label: "Pelanggan" },
   { href: "/admin/produk", label: "Produk" },
   { href: "/admin/pesanan", label: "Pesanan" },
+  { href: "/admin/kurir", label: "Kurir" },
+  { href: "/admin/rute", label: "Rute Pengantaran" },
 ];
