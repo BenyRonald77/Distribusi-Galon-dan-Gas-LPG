@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import KurirForm from "@/components/kurir-form";
 import DeleteButton from "@/components/delete-button";
@@ -27,7 +28,12 @@ export default async function KurirPage() {
                 <p className="text-sm font-medium text-ink">{k.nama}</p>
                 <p className="text-sm text-ink-soft">{k.noHp}</p>
               </div>
-              <DeleteButton url={`/api/kurir/${k.id}`} confirmMessage={`Hapus kurir "${k.nama}"?`} />
+              <div className="flex items-center gap-2">
+                <Link href={`/kurir/${k.id}`} target="_blank" className="btn-secondary px-3 py-1.5 text-xs">
+                  Buka Dashboard Rute
+                </Link>
+                <DeleteButton url={`/api/kurir/${k.id}`} confirmMessage={`Hapus kurir "${k.nama}"?`} />
+              </div>
             </div>
           ))}
         </div>
