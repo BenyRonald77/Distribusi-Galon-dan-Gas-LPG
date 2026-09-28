@@ -7,9 +7,91 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// Model lengkap ditambahkan pada commit fitur "skema database lengkap".
 model Admin {
   id           String @id @default(cuid())
   username     String @unique
   passwordHash String
+}
+
+// SQLite tidak mendukung tipe enum native di Prisma, sehingga jenis produk
+// dan status pesanan disimpan sebagai String dan divalidasi di level
+// aplikasi lewat Zod (lihat src/lib/validation.ts). Nilai yang valid:
+// JenisProduk: "GALON" | "LPG"
+// StatusPesanan: "BARU" | "DIPROSES" | "DIANTAR" | "SELESAI"
+
+model Pelanggan {
+  id             String   @id @default(cuid())
+  nama           String
+  alamat         String
+  latitude       Float
+  longitude      Float
+  noHp           String
+  pelangganTetap Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  pesanan       Pesanan[]
+  galonPinjaman GalonPinjaman?
+
+  @@index([nama])
+}
+
+model Produk {
+  id            String      @id @default(cuid())
+  nama          String
+  jenis         String
+  varian        String?
+  harga         Int
+  depositGalon  Int?
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  pesananItem PesananItem[]
+}
+
+model Kurir {
+  id        String    @id @default(cuid())
+  nama      String
+  noHp      String
+  createdAt DateTime  @default(now())
+  pesanan   Pesanan[]
+}
+
+model Pesanan {
+  id                  String        @id @default(cuid())
+  pelangganId         String
+  pelanggan           Pelanggan     @relation(fields: [pelangganId], references: [id])
+  kurirId             String?
+  kurir               Kurir?        @relation(fields: [kurirId], references: [id])
+  tanggal             DateTime
+  status              String        @default("BARU")
+  urutanRute          Int?
+  galonKosongDiambil  Int?
+  depositDiterima     Int?
+  createdAt           DateTime      @default(now())
+  updatedAt           DateTime      @updatedAt
+
+  items PesananItem[]
+
+  @@index([tanggal, status])
+  @@index([kurirId, tanggal])
+}
+
+model PesananItem {
+  id           String  @id @default(cuid())
+  pesananId    String
+  pesanan      Pesanan @relation(fields: [pesananId], references: [id], onDelete: Cascade)
+  produkId     String
+  produk       Produk  @relation(fields: [produkId], references: [id])
+  jumlah       Int
+  hargaSatuan  Int
+}
+
+model GalonPinjaman {
+  id                String    @id @default(cuid())
+  pelangganId       String    @unique
+  pelanggan         Pelanggan @relation(fields: [pelangganId], references: [id])
+  jumlahDipinjam    Int       @default(0)
+  depositTerkumpul  Int       @default(0)
+  updatedAt         DateTime  @updatedAt
 }
