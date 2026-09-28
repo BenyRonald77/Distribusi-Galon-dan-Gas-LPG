@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import StatusBadge from "@/components/status-badge";
+import PesananStatusAction from "@/components/pesanan-status-action";
 import type { StatusPesanan } from "@/lib/constants";
 
 function formatTanggal(date: Date) {
@@ -21,6 +22,12 @@ export default async function PesananDetailPage({ params }: { params: { id: stri
   if (!pesanan) notFound();
 
   const total = pesanan.items.reduce((sum, item) => sum + item.hargaSatuan * item.jumlah, 0);
+  const itemGalon = pesanan.items.filter((item) => item.produk.jenis === "GALON");
+  const punyaItemGalon = itemGalon.length > 0;
+  const depositGalonDefault = itemGalon.reduce(
+    (sum, item) => sum + (item.produk.depositGalon ?? 0) * item.jumlah,
+    0
+  );
 
   return (
     <div className="max-w-2xl">
@@ -70,12 +77,21 @@ export default async function PesananDetailPage({ params }: { params: { id: stri
           </div>
         </div>
 
-        {pesanan.status === "SELESAI" && (
-          <div className="mt-6 border-t border-line pt-4 text-sm text-ink-soft">
-            <p>Galon kosong diambil: {pesanan.galonKosongDiambil ?? 0}</p>
-            <p>Deposit diterima/dikembalikan: Rp{(pesanan.depositDiterima ?? 0).toLocaleString("id-ID")}</p>
-          </div>
-        )}
+        <div className="mt-6 border-t border-line pt-4">
+          <h2 className="mb-3 text-sm font-semibold text-ink">Status Pengantaran</h2>
+          <PesananStatusAction
+            pesananId={pesanan.id}
+            status={pesanan.status as StatusPesanan}
+            punyaItemGalon={punyaItemGalon}
+            depositGalonDefault={depositGalonDefault}
+          />
+          {pesanan.status === "SELESAI" && punyaItemGalon && (
+            <div className="mt-3 text-sm text-ink-soft">
+              <p>Galon kosong diambil: {pesanan.galonKosongDiambil ?? 0}</p>
+              <p>Deposit diterima/dikembalikan: Rp{(pesanan.depositDiterima ?? 0).toLocaleString("id-ID")}</p>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
