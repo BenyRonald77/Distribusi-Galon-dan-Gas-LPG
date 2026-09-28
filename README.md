@@ -99,3 +99,7 @@ PRD.md                  Dokumen kebutuhan produk
 ## Skill antislop
 
 Repo ini memakai skill `antislop` dan `antislop-ui` (`.agents/skills/`) untuk menjaga UI tetap punya identitas visual yang disengaja, bukan tampilan generik hasil AI. Lihat `CLAUDE.md`.
+
+## Kontributor
+
+- BenyRonald77
